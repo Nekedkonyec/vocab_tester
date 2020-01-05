@@ -1,19 +1,40 @@
 #include "word.h"
 
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 #include <random>
 #include <vector>
 
-int main(int, char**)
+
+
+std::vector<Word> read_from_file(const std::string& filename)
 {
-    std::vector<Word> word_list
+    std::ifstream file(filename);
+    std::vector<Word> word_list;
+
+    if (!file.is_open())
     {
-        Word("alma", "apple"),
-        Word("korte", "pear"),
-        Word("barack", "peach"),
-        Word("szilva", "plum")
-    };
+        std::cerr << "Cannot open file: " << filename << std::endl;
+        return word_list;
+    }
+
+    std::string line;
+
+    while (std::getline(file, line))
+    {
+        Word new_word(line.substr(0, line.find("/")), line.substr(line.find("/") + 1, std::string::npos));
+
+        word_list.push_back(new_word);
+    }
+    file.close();
+
+    return word_list;
+}
+
+int main(int argc, char** args)
+{
+    std::vector<Word> word_list = read_from_file("words.txt");
 
     const double number_of_original_questions = word_list.size();
 
@@ -40,11 +61,4 @@ int main(int, char**)
             std::cout << "Incorrect answer! The correct answer was: " << current_question.correct_answer() << std::endl << std::endl;
         }
     }
-
-    /*ciklus, amíg a word_list hossza > 0 (while loop)
-        word kérdésének kiírása (utolsó elem);
-        válasz bekérése;
-        ha válasz == correct_válasszal, akkor:
-            word eltávolítása a listából (vector pop_back)
-        vector összekeverése; (random_shuffle) */
 }
